@@ -34,6 +34,25 @@ class AuthService {
             throw error;
         }
     }
+
+    // Forgotten hesla
+    async forgottenPassword(username) {
+        try {
+            return await ApiClient.post('/auth/reset-password', { username });
+        } catch (error) {
+            console.error('Chyba při resetování hesla:', error);
+            throw error;
+        }
+    }
+
+    async setPassword(token, password) {
+        try {
+            return await ApiClient.post('/auth/set-password', { token, password });
+        } catch (error) {
+            console.error('Chyba při nastavování hesla:', error);
+            throw error;
+        }
+    }
 }
 
 export default new AuthService();

@@ -1,4 +1,3 @@
-// apiService.js
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -9,7 +8,25 @@ class ApiClient {
       headers: {
         "Content-Type": "application/json",
       },
+      withCredentials: true // Umožňuje posílat cookies s každým požadavkem
     });
+
+    // Interceptor pro přidání tokenu u každého požadavku kromě autentizace
+    this.client.interceptors.request.use(
+      (config) => {
+        const authEndpoints = ['/auth/login', '/auth/signup', '/auth/forgot-password'];
+        const isAuthEndpoint = authEndpoints.some(endpoint => config.url.includes(endpoint));
+
+        if (!isAuthEndpoint) {
+          const token = this.getTokenFromCookies();
+          if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+          }
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
   }
 
   getTokenFromCookies() {
@@ -23,12 +40,13 @@ class ApiClient {
         expires: 1, // Platnost 1 den
         sameSite: "None", // Explicitně nastaví SameSite na 'None'
         secure: true, // Vyžaduje HTTPS
-      }); // Uložení tokenu do cookies
+      });
     } else {
       delete this.client.defaults.headers["Authorization"];
       Cookies.remove("authToken");
     }
   }
+
   // GET požadavek
   async get(url, params = {}) {
     try {
@@ -71,16 +89,11 @@ class ApiClient {
 
   // Chybové zpracování
   handleError(error) {
-    console.error("API Error:", error);
     if (error.response) {
-      // Server odpověděl s jiným stavovým kódem než 2xx
-      console.error("Response data:", error.response.data);
-      console.error("Response status:", error.response.status);
+      console.error("Response data:", error.response);
     } else if (error.request) {
-      // Žádost byla odeslána, ale nedošla žádná odpověď
       console.error("Request data:", error.request);
     } else {
-      // Chyba při nastavení požadavku
       console.error("Error message:", error.message);
     }
     throw error;

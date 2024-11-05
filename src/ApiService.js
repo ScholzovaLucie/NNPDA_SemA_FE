@@ -58,10 +58,6 @@ class ApiService {
       }
     }
   
-    // Zpracování chyb
-    handleError(error) {
-      console.error('API Error:', error);
-    }
   }
   
   export default new ApiService('http://localhost:2024');

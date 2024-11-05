@@ -80,13 +80,13 @@ const Login = () => {
                     </Button>
                     <Grid container>
                         <Grid item xs>
-                            <Link component={RouterLink} to="#" variant="body2">
+                            <Link component={RouterLink} to="/forgotten-password" variant="body2">
                                 Zapomněli jste heslo?
                             </Link>
                         </Grid>
                         <Grid item>
                             <Link component={RouterLink} to="/register" variant="body2">
-                                {"Nemáte účet? Zaregistrujte se"}
+                                {"Registrace"}
                             </Link>
                         </Grid>
                     </Grid>

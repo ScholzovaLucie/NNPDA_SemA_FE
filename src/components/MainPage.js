@@ -1,156 +1,138 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Typography, List, ListItem, ListItemText, Box, Grid, Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
-import DeviceService from './../services/DeviceService';
+import React, { useState, useEffect } from "react";
+import {
+  Container,
+  Typography,
+  Box,
+  Grid,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+} from "@mui/material";
+import DeviceService from "./../services/DeviceService";
+import AllDevicesDialog from "./../dialogs/AllDevicesDialog";
+import AllSensorsDialog from "./../dialogs/AllSensorsDialog"; // Import AllSensorsDialog
 
 function MainPage() {
-    const [devices, setDevices] = useState([]);
-    const [selectedDevice, setSelectedDevice] = useState(null);
-    const [sensors, setSensors] = useState([]);
-    const [openDeviceDialog, setOpenDeviceDialog] = useState(false);
-    const [openSensorDialog, setOpenSensorDialog] = useState(false);
-    const [deviceData, setDeviceData] = useState({ name: '', description: '' });
-    const [sensorData, setSensorData] = useState({ name: '', type: '', unit: '' });
+  const [userDevices, setUserDevices] = useState([]);
+  const [sensorsForDevice, setSensorsForDevice] = useState([]); // Senzory pro vybrané zařízení
+  const [selectedDevice, setSelectedDevice] = useState(null);
+  const [openAllDevicesDialog, setOpenAllDevicesDialog] = useState(false);
+  const [openAllSensorsDialog, setOpenAllSensorsDialog] = useState(false);
 
-    useEffect(() => {
-        fetchDevices();
-    }, []);
+  // Načítání uživatelských zařízení při mountu
+  useEffect(() => {
+    fetchUserDevices();
+  }, []);
 
-    const fetchDevices = async () => {
-        try {
-            const response = await DeviceService.getUserDevices();
-            setDevices(response);
-        } catch (error) {
-        }
-    };
+  // Funkce pro načtení uživatelských zařízení
+  const fetchUserDevices = async () => {
+    try {
+      const response = await DeviceService.getUserDevices();
+      setUserDevices(response);
+    } catch (error) {
+      console.error("Chyba při načítání uživatelských zařízení:", error);
+    }
+  };
 
-    const handleDeviceSelect = async (device) => {
-        setSelectedDevice(device);
-        fetchSensors(device.id);
-    };
+  // Funkce pro načtení senzorů pro vybrané zařízení
+  const fetchSensorsForDevice = async (deviceId) => {
+    try {
+      const response = await DeviceService.getSensorsForDevice(deviceId);
+      setSensorsForDevice(response);
+    } catch (error) {
+      console.error("Chyba při načítání senzorů zařízení:", error);
+    }
+  };
 
-    const fetchSensors = async (deviceId) => {
-        try {
-            const response = await DeviceService.getSensorsForDevice(deviceId);
-            setSensors(response);
-        } catch (error) {
-            console.error("Chyba při načítání senzorů:", error);
-        }
-    };
+  // Funkce pro zobrazení senzorů vybraného zařízení
+  const handleSelectDevice = (device) => {
+    setSelectedDevice(device);
+    fetchSensorsForDevice(device.id); // Načtení senzorů pro vybrané zařízení
+  };
 
-    const handleAddDevice = () => {
-        setOpenDeviceDialog(true);
-    };
+  // Funkce pro aktualizaci seznamu zařízení
+  const handleDeviceUpdate = () => {
+    fetchUserDevices();
+  };
 
-    const handleSaveDevice = async () => {
-        await DeviceService.createDevice(deviceData.name, deviceData.description);
-        setOpenDeviceDialog(false);
-        setDeviceData({ name: '', description: '' });
-        fetchDevices();
-    };
+  return (
+    <Container>
+      <Box mt={5} textAlign="center">
+        <Typography variant="h4" gutterBottom>
+          Správa zařízení
+        </Typography>
+      </Box>
+      <Grid container spacing={3}>
+        {/* Seznam uživatelských zařízení */}
+        <Grid item xs={12} md={4}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => setOpenAllDevicesDialog(true)}
+          >
+            Zobrazit všechna zařízení
+          </Button>
+          <Typography variant="h6">Vaše zařízení</Typography>
+          <List>
+            {userDevices.map((device) => (
+              <ListItem
+                key={device.id}
+                button
+                onClick={() => handleSelectDevice(device)} // Kliknutím zobrazíme senzory zařízení
+              >
+                <ListItemText primary={device.deviceName} />
+              </ListItem>
+            ))}
+          </List>
+        </Grid>
 
-    const handleDeleteDevice = async (deviceId) => {
-        await DeviceService.deleteDevice(deviceId);
-        setSelectedDevice(null);
-        setSensors([]);
-        fetchDevices();
-    };
+        {/* Senzory pro vybrané zařízení */}
+        <Grid item xs={12} md={4}>
+          {selectedDevice ? (
+            <>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => setOpenAllSensorsDialog(true)}
+                style={{ marginLeft: "10px" }}
+              >
+                Zobrazit všechny senzory
+              </Button>
+              <Typography variant="h6">
+                Senzory pro: {selectedDevice.deviceName}
+              </Typography>
 
-    const handleAddSensor = () => {
-        setOpenSensorDialog(true);
-    };
+              <List>
+                {sensorsForDevice.map((sensor) => (
+                  <ListItem button={true} key={sensor.id}>
+                    <ListItemText primary={sensor.name} />
+                  </ListItem>
+                ))}
+              </List>
+            </>
+          ) : (
+            <Typography variant="body1">
+              Vyberte zařízení pro zobrazení senzorů.
+            </Typography>
+          )}
+        </Grid>
+      </Grid>
 
-    const handleSaveSensor = async () => {
-        await DeviceService.createSensor(sensorData.name, sensorData.type, sensorData.unit);
-        setOpenSensorDialog(false);
-        setSensorData({ name: '', type: '', unit: '' });
-        fetchSensors(selectedDevice.id);
-    };
+      {/* Dialog pro zobrazení všech zařízení */}
+      <AllDevicesDialog
+        open={openAllDevicesDialog}
+        onClose={() => setOpenAllDevicesDialog(false)}
+        onDeviceUpdated={handleDeviceUpdate} // Aktualizace seznamů při změně
+      />
 
-    const handleDeleteSensor = async (sensorId) => {
-        await DeviceService.removeSensorFromDevice(sensorId, selectedDevice.id);
-        fetchSensors(selectedDevice.id);
-    };
-
-    return (
-        <Container>
-            <Box mt={5} textAlign="center">
-                <Typography variant="h4" gutterBottom>
-                    Správa zařízení a senzorů
-                </Typography>
-            </Box>
-            <Grid container spacing={3}>
-                <Grid item xs={12} md={4}>
-                    <Typography variant="h6">Vaše zařízení</Typography>
-                    <List>
-                        {devices.map((device) => (
-                            <ListItem
-                                key={device.id}
-                                button
-                                selected={selectedDevice && selectedDevice.id === device.id}
-                                onClick={() => handleDeviceSelect(device)}
-                            >
-                                <ListItemText primary={device.name} />
-                                <Button color="secondary" onClick={() => handleDeleteDevice(device.id)}>
-                                    Odstranit
-                                </Button>
-                            </ListItem>
-                        ))}
-                    </List>
-                    <Button variant="contained" color="primary" onClick={handleAddDevice}>
-                        Přidat nové zařízení
-                    </Button>
-                </Grid>
-
-                <Grid item xs={12} md={8}>
-                    {selectedDevice ? (
-                        <Box>
-                            <Typography variant="h6">Senzory zařízení: {selectedDevice.name}</Typography>
-                            <List>
-                                {sensors.map((sensor) => (
-                                    <ListItem key={sensor.id}>
-                                        <ListItemText primary={sensor.name} />
-                                        <Button color="secondary" onClick={() => handleDeleteSensor(sensor.id)}>
-                                            Odstranit senzor
-                                        </Button>
-                                    </ListItem>
-                                ))}
-                            </List>
-                            <Button variant="contained" color="primary" onClick={handleAddSensor}>
-                                Přidat senzor k zařízení
-                            </Button>
-                        </Box>
-                    ) : (
-                        <Typography variant="body1">Vyberte zařízení pro zobrazení senzorů.</Typography>
-                    )}
-                </Grid>
-            </Grid>
-
-            <Dialog open={openDeviceDialog} onClose={() => setOpenDeviceDialog(false)}>
-                <DialogTitle>Přidat nové zařízení</DialogTitle>
-                <DialogContent>
-                    <TextField label="Název zařízení" fullWidth margin="normal" value={deviceData.name} onChange={(e) => setDeviceData({ ...deviceData, name: e.target.value })} />
-                    <TextField label="Popis zařízení" fullWidth margin="normal" value={deviceData.description} onChange={(e) => setDeviceData({ ...deviceData, description: e.target.value })} />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenDeviceDialog(false)}>Zrušit</Button>
-                    <Button onClick={handleSaveDevice} color="primary">Uložit</Button>
-                </DialogActions>
-            </Dialog>
-
-            <Dialog open={openSensorDialog} onClose={() => setOpenSensorDialog(false)}>
-                <DialogTitle>Přidat nový senzor</DialogTitle>
-                <DialogContent>
-                    <TextField label="Název senzoru" fullWidth margin="normal" value={sensorData.name} onChange={(e) => setSensorData({ ...sensorData, name: e.target.value })} />
-                    <TextField label="Typ senzoru" fullWidth margin="normal" value={sensorData.type} onChange={(e) => setSensorData({ ...sensorData, type: e.target.value })} />
-                    <TextField label="Jednotka senzoru" fullWidth margin="normal" value={sensorData.unit} onChange={(e) => setSensorData({ ...sensorData, unit: e.target.value })} />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenSensorDialog(false)}>Zrušit</Button>
-                    <Button onClick={handleSaveSensor} color="primary">Uložit</Button>
-                </DialogActions>
-            </Dialog>
-        </Container>
-    );
+      {/* Dialog pro zobrazení všech senzorů */}
+      <AllSensorsDialog
+        open={openAllSensorsDialog}
+        onClose={() => setOpenAllSensorsDialog(false)}
+      />
+    </Container>
+  );
 }
 
 export default MainPage;

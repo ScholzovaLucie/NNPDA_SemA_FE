@@ -27,7 +27,7 @@ function DeviceDetail() {
                 <Typography variant="h4">Detaily zařízení</Typography>
                 <List>
                     {sensors.map((sensor) => (
-                        <ListItem key={sensor.id}>
+                        <ListItem button={true} key={sensor.id}>
                             <ListItemText primary={sensor.name} />
                         </ListItem>
                     ))}

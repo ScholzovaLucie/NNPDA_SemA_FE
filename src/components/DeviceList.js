@@ -30,7 +30,7 @@ function DeviceList() {
                 <Typography variant="h4">Vaše zařízení</Typography>
                 <List>
                     {devices.map((device) => (
-                        <ListItem key={device.id} button onClick={() => handleDeviceSelect(device.id)}>
+                        <ListItem button={true} key={device.id} button onClick={() => handleDeviceSelect(device.id)}>
                             <ListItemText primary={device.name} />
                         </ListItem>
                     ))}

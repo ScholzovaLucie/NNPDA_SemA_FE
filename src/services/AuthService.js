@@ -1,6 +1,12 @@
 import ApiClient from './ApiClient';
 
 class AuthService {
+    getCurrentUserId() {
+        const user = JSON.parse(localStorage.getItem('user')); // Nebo jiný způsob získání dat
+        console.log(user)
+        return user ? user.id : null;
+    }
+
     // Registrace nového uživatele
     async registerUser(username, password, email) {
         return await ApiClient.post('/auth/signup', { username, password, email});
@@ -9,13 +15,13 @@ class AuthService {
     // Přihlášení uživatele
     async loginUser(username, password) {
         const user = await ApiClient.post('/auth/login', {username, password});
-        console.log(user)
 
         if (!user) {
             throw new Error('Neplatné přihlašovací údaje');
         }
 
         ApiClient.setAuthToken(user.token);
+        localStorage.setItem('user', JSON.stringify(user)); 
         return { user, token: user.token };
     }
 

@@ -1,5 +1,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
+import AuthService from "./AuthService";
+import { useNavigate } from "react-router-dom";
 
 class ApiClient {
   constructor(baseURL) {
@@ -26,6 +28,18 @@ class ApiClient {
         return config;
       },
       (error) => Promise.reject(error)
+    );
+    this.client.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          AuthService.logoutUser();
+          const navigate = useNavigate();
+          console.log('Vaše relace vypršela. Přihlaste se znovu.')
+          navigate("/login", { state: { message: "Vaše relace vypršela. Přihlaste se znovu." } });
+        }
+        return Promise.reject(error);
+      }
     );
   }
 
@@ -78,14 +92,14 @@ class ApiClient {
   }
 
   // DELETE požadavek
-  async delete(url) {
+  async delete(url, data) {
     try {
-      const response = await this.client.delete(url);
-      return response.data;
+        const response = await this.client.delete(url, { data }); // Předání dat správně
+        return response.data;
     } catch (error) {
-      this.handleError(error);
+        this.handleError(error);
     }
-  }
+}
 
   // Chybové zpracování
   handleError(error) {

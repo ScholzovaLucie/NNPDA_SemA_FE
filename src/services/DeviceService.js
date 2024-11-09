@@ -1,4 +1,5 @@
 import ApiClient from './ApiClient';
+import AuthService from './AuthService';
 
 class DeviceService {
     // Načtení zařízení uživatele
@@ -32,26 +33,27 @@ class DeviceService {
 
     // Odstranění zařízení podle ID
     async deleteDevice(id) {
-        const getByIdDTO = { id };
-        return await ApiClient.delete('/devices', { data: getByIdDTO });
+        const getByIdDTO = { id: id };
+        return await ApiClient.delete('/devices/',  getByIdDTO);
     }
 
     // Přiřazení existujícího zařízení k uživateli (AssignDeviceDTO)
-    async assignDeviceToUser(deviceId, userId) {
+    async assignDeviceToUser(deviceId) {
+        // Získání ID uživatele z AuthService
+        const userId = AuthService.getCurrentUserId();
+
         const assignDeviceDTO = {
             deviceId: deviceId,
             userId: userId
         };
+
         return await ApiClient.post('/devices/assign', assignDeviceDTO);
     }
 
     // Odebrání zařízení od uživatele
-    async removeDeviceFromUser(deviceId, userId) {
-        const assignDeviceDTO = {
-            deviceId: deviceId,
-            userId: userId
-        };
-        return await ApiClient.delete('/devices/remove', { data: assignDeviceDTO });
+    async removeDeviceFromUser(deviceId) {
+        const assignDeviceDTO = { deviceId: deviceId };
+        return await ApiClient.delete('/devices/remove', assignDeviceDTO); // Předání dat
     }
 
     // Načtení všech senzorů
@@ -65,24 +67,22 @@ class DeviceService {
     }
 
     // Vytvoření nového senzoru (CreateSensorDTO)
-    async createSensor(name, type, unit) {
+    async createSensor(name, description) {
         const createSensorDTO = {
             name: name,
-            type: type,
-            unit: unit
+            description: description
         };
-        return await ApiClient.post('/sensors', createSensorDTO);
+        return await ApiClient.post('/sensors/', createSensorDTO);
     }
 
     // Aktualizace senzoru (UpdateSensorDTO)
-    async updateSensor(id, name, type, unit) {
+    async updateSensor(id, name, description) {
         const updateSensorDTO = {
             id: id,
             name: name,
-            type: type,
-            unit: unit
+            description: description
         };
-        return await ApiClient.put('/sensors', updateSensorDTO);
+        return await ApiClient.put('/sensors/', updateSensorDTO);
     }
 
     // Přiřazení senzoru k zařízení (AssignSensorDTO)

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Avatar, Button, TextField, Link, Grid, Box, Typography, Container } from '@mui/material';
+import { Avatar, Button, TextField, Link, Grid, Box, Typography, Container, Alert  } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation  } from 'react-router-dom';
 import AuthService from '../services/AuthService';
 
 
@@ -10,6 +10,8 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState(''); // Stav pro chybovou zprávu
     const navigate = useNavigate();
+    const location = useLocation();
+    const message = location.state?.message; 
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -40,6 +42,7 @@ const Login = () => {
                     Přihlášení
                 </Typography>
                 <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                    {message && <Alert severity="warning">{message}</Alert>}
                     <TextField
                         margin="normal"
                         required

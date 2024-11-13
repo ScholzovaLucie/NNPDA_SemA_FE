@@ -11,21 +11,21 @@ import {
 } from "@mui/material";
 import DeviceService from "./../services/DeviceService";
 import AllDevicesDialog from "./../dialogs/AllDevicesDialog";
-import AllSensorsDialog from "./../dialogs/AllSensorsDialog"; // Import AllSensorsDialog
+import AllSensorsDialog from "./../dialogs/AllSensorsDialog";
 
 function MainPage() {
   const [userDevices, setUserDevices] = useState([]);
-  const [sensorsForDevice, setSensorsForDevice] = useState([]); // Senzory pro vybrané zařízení
+  const [sensorsForDevice, setSensorsForDevice] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState(null);
+  const [selectedSensor, setSelectedSensor] = useState(null);
+  const [sensorData, setSensorData] = useState([]); // Nový stav pro data senzoru
   const [openAllDevicesDialog, setOpenAllDevicesDialog] = useState(false);
   const [openAllSensorsDialog, setOpenAllSensorsDialog] = useState(false);
 
-  // Načítání uživatelských zařízení při mountu
   useEffect(() => {
     fetchUserDevices();
   }, []);
 
-  // Funkce pro načtení uživatelských zařízení
   const fetchUserDevices = async () => {
     try {
       const response = await DeviceService.getUserDevices();
@@ -35,9 +35,9 @@ function MainPage() {
     }
   };
 
-  // Funkce pro načtení senzorů pro vybrané zařízení
   const fetchSensorsForDevice = async (deviceId) => {
     try {
+      if (!deviceId) deviceId = selectedDevice.id;
       const response = await DeviceService.getSensorsForDevice(deviceId);
       setSensorsForDevice(response);
     } catch (error) {
@@ -45,15 +45,31 @@ function MainPage() {
     }
   };
 
-  // Funkce pro zobrazení senzorů vybraného zařízení
-  const handleSelectDevice = (device) => {
-    setSelectedDevice(device);
-    fetchSensorsForDevice(device.id); // Načtení senzorů pro vybrané zařízení
+  const fetchSensorData = async (sensorId) => {
+    try {
+      const response = await DeviceService.getSensorData(sensorId); // Volání API
+      setSensorData(response); // Uložení dat do stavu
+    } catch (error) {
+
+    }
   };
 
-  // Funkce pro aktualizaci seznamu zařízení
+  const handleSelectDevice = (device) => {
+    setSelectedDevice(device);
+    fetchSensorsForDevice(device.id);
+  };
+
+  const handleSelectSensor = (sensor) => {
+    fetchSensorData(sensor.id); // Načtení dat senzoru po kliknutí
+    setSelectedSensor(sensor);
+  };
+
   const handleDeviceUpdate = () => {
     fetchUserDevices();
+  };
+
+  const handleSensorUpdate = () => {
+    fetchSensorsForDevice();
   };
 
   return (
@@ -64,7 +80,6 @@ function MainPage() {
         </Typography>
       </Box>
       <Grid container spacing={3}>
-        {/* Seznam uživatelských zařízení */}
         <Grid item xs={12} md={4}>
           <Button
             variant="outlined"
@@ -79,7 +94,14 @@ function MainPage() {
               <ListItem
                 key={device.id}
                 button
-                onClick={() => handleSelectDevice(device)} // Kliknutím zobrazíme senzory zařízení
+                onClick={() => handleSelectDevice(device)}
+                selected={selectedDevice && selectedDevice.id === device.id}
+                sx={{
+                  bgcolor:
+                    selectedDevice && selectedDevice.id === device.id
+                      ? "rgba(0, 0, 255, 0.1)"
+                      : "inherit",
+                }}
               >
                 <ListItemText primary={device.deviceName} />
               </ListItem>
@@ -87,7 +109,6 @@ function MainPage() {
           </List>
         </Grid>
 
-        {/* Senzory pro vybrané zařízení */}
         <Grid item xs={12} md={4}>
           {selectedDevice ? (
             <>
@@ -99,14 +120,14 @@ function MainPage() {
               >
                 Zobrazit všechny senzory
               </Button>
-              <Typography variant="h6">
-                Senzory pro: {selectedDevice.deviceName}
-              </Typography>
-
               <List>
                 {sensorsForDevice.map((sensor) => (
-                  <ListItem button={true} key={sensor.id}>
-                    <ListItemText primary={sensor.name} />
+                  <ListItem
+                    button
+                    key={sensor.id}
+                    onClick={() => handleSelectSensor(sensor)}
+                  >
+                    <ListItemText primary={sensor.sensorName} />
                   </ListItem>
                 ))}
               </List>
@@ -117,19 +138,37 @@ function MainPage() {
             </Typography>
           )}
         </Grid>
+
+        {/* Seznam dat pro vybraný senzor */}
+        <Grid item xs={12} md={4}>
+        {selectedSensor ? (
+            <>
+          <Typography variant="h6">Data senzoru</Typography>
+          <Box sx={{ maxHeight: 300, overflowY: "auto", border: "1px solid #ddd", borderRadius: 4 }}>
+            <List>
+              {sensorData.map((data, index) => (
+                <ListItem key={index}>
+                  <ListItemText primary={JSON.stringify(data)} />
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+          </>
+        ):(<></>)}
+        </Grid>
       </Grid>
 
-      {/* Dialog pro zobrazení všech zařízení */}
       <AllDevicesDialog
         open={openAllDevicesDialog}
         onClose={() => setOpenAllDevicesDialog(false)}
-        onDeviceUpdated={handleDeviceUpdate} // Aktualizace seznamů při změně
+        onDeviceUpdated={handleDeviceUpdate}
       />
 
-      {/* Dialog pro zobrazení všech senzorů */}
       <AllSensorsDialog
         open={openAllSensorsDialog}
         onClose={() => setOpenAllSensorsDialog(false)}
+        selectedDevice={selectedDevice}
+        onSensorUpdate={handleSensorUpdate}
       />
     </Container>
   );

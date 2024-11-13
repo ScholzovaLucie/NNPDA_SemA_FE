@@ -21,7 +21,7 @@ const DetailBox = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.background.default,
 }));
 
-function AllSensorsDialog({ open, onClose, selectedDevice, onSensorAssigned }) {
+function AllSensorsDialog({ open, onClose, selectedDevice, onSensorUpdate }) {
     const [userSensors, setUserSensors] = useState([]);
     const [allSensors, setAllSensors] = useState([]);
     const [selectedSensor, setSelectedSensor] = useState(null);
@@ -30,28 +30,16 @@ function AllSensorsDialog({ open, onClose, selectedDevice, onSensorAssigned }) {
 
     // Načítání senzorů při změně vybraného zařízení
     useEffect(() => {
-        if (selectedDevice) {
-            fetchUserSensors();
+        if (open) {
             fetchAllSensors();
         }
-    }, [selectedDevice]);
+    }, [open]);
 
-    // Funkce pro načtení senzorů uživatele pro dané zařízení
-    const fetchUserSensors = async () => {
-        try {
-            const response = await DeviceService.getSensorsForDevice(selectedDevice.id);
-            console.log(response)
-            setUserSensors(response);
-        } catch (error) {
-            console.error("Chyba při načítání senzorů uživatele:", error);
-        }
-    };
 
     // Funkce pro načtení všech senzorů
     const fetchAllSensors = async () => {
         try {
             const response = await DeviceService.getAllSensors();
-            console.log(response)
             setAllSensors(response);
         } catch (error) {
             console.error("Chyba při načítání všech senzorů:", error);
@@ -67,22 +55,25 @@ function AllSensorsDialog({ open, onClose, selectedDevice, onSensorAssigned }) {
     const handleAssignSensor = async () => {
         if (selectedSensor) {
             try {
+                console.log(selectedDevice);
                 await DeviceService.assignSensorToDevice(selectedSensor.id, selectedDevice.id);
-                onSensorAssigned(); // Aktualizace seznamu senzorů zařízení
-                fetchUserSensors();
+                onSensorUpdate(); // Aktualizace seznamu senzorů zařízení
+                fetchAllSensors(); 
+                onClose();
             } catch (error) {
                 console.error("Chyba při přiřazování senzoru:", error);
             }
         }
     };
 
-    // Odstranění senzoru ze zařízení
-    const handleDeleteSensor = async (sensorId) => {
+    const handleDeleteService = async (sensorId) => {
         try {
-            await DeviceService.removeSensorFromDevice(sensorId, selectedDevice.id);
-            fetchUserSensors(); // Aktualizace seznamu senzorů uživatele
+            console.log(sensorId)
+            await DeviceService.deleteSensor(sensorId);
+            onSensorUpdate(); // Aktualizace seznamů v nadřazené komponentě
+            fetchAllSensors(); // Aktualizace seznamu v dialogu
         } catch (error) {
-            console.error("Chyba při odstraňování senzoru:", error);
+            console.error("Chyba při mazání zařízení:", error);
         }
     };
 
@@ -92,6 +83,7 @@ function AllSensorsDialog({ open, onClose, selectedDevice, onSensorAssigned }) {
             await DeviceService.createSensor(newSensorData.name, newSensorData.description);
             setNewSensorData({ name: '', description: '' });
             fetchAllSensors(); // Aktualizace seznamu všech senzorů
+            onSensorUpdate();
         } catch (error) {
             console.error("Chyba při vytváření senzoru:", error);
         }
@@ -107,7 +99,7 @@ function AllSensorsDialog({ open, onClose, selectedDevice, onSensorAssigned }) {
                         {selectedSensor ? (
                             <DetailBox>
                                 <Typography variant="h6">Detail senzoru</Typography>
-                                <Typography variant="body1"><strong>Název:</strong> {selectedSensor.name}</Typography>
+                                <Typography variant="body1"><strong>Název:</strong> {selectedSensor.sensorName}</Typography>
                                 <Typography variant="body1"><strong>Popis:</strong> {selectedSensor.description || 'Žádný popis'}</Typography>
                                 <Box mt={2} textAlign="center">
                                     <Button variant="contained" color="primary" onClick={handleAssignSensor}>
@@ -133,15 +125,25 @@ function AllSensorsDialog({ open, onClose, selectedDevice, onSensorAssigned }) {
                         <Box sx={{ maxHeight: 300, overflowY: 'auto', border: '1px solid #ddd', borderRadius: 4 }}>
                             <List>
                                 {allSensors
-                                    .filter(sensor => sensor.name.toLowerCase().includes(filter.toLowerCase()))
+                                    .filter(sensor => sensor.sensorName.toLowerCase().includes(filter.toLowerCase()))
                                     .map(sensor => (
                                         <StyledListItem
                                             key={sensor.id}
                                             button
                                             selected={selectedSensor && selectedSensor.id === sensor.id}
                                             onClick={() => handleSelectSensor(sensor)}
+                                            sx={{
+                                                bgcolor: selectedSensor && selectedSensor.id === sensor.id ? "rgba(0, 0, 255, 0.1)" : "inherit"
+                                              }}
                                         >
-                                            <ListItemText primary={sensor.name} />
+                                            <ListItemText primary={sensor.sensorName} />
+                                            <IconButton
+                                            edge="end"
+                                            color="secondary"
+                                            onClick={() => handleDeleteService(sensor.id)}
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
                                         </StyledListItem>
                                     ))}
                             </List>

@@ -63,7 +63,11 @@ class DeviceService {
 
     // Načtení senzorů připojených k danému zařízení
     async getSensorsForDevice(deviceId) {
-        return await ApiClient.get('/sensors/device', { device_id: deviceId });
+        return await ApiClient.get('/sensors/device/', { device_id: deviceId });
+    }
+
+    async getSensorData(id) {
+        return await ApiClient.get('/sensor/data/all', { sensor_id: id });
     }
 
     // Vytvoření nového senzoru (CreateSensorDTO)
@@ -83,6 +87,15 @@ class DeviceService {
             description: description
         };
         return await ApiClient.put('/sensors/', updateSensorDTO);
+    }
+
+    
+    // Aktualizace senzoru (UpdateSensorDTO)
+    async deleteSensor(id) {
+        const deleteSensorDTO = {
+            id: id
+        };
+        return await ApiClient.delete('/sensors/', deleteSensorDTO);
     }
 
     // Přiřazení senzoru k zařízení (AssignSensorDTO)

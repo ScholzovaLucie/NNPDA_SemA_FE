@@ -86,7 +86,6 @@ function AllDevicesDialog({ open, onClose, onDeviceUpdated }) {
             setNewDeviceData({ name: '', description: '' });
             onDeviceUpdated(); // Aktualizace seznamů v nadřazené komponentě
             fetchAllDevices(); // Aktualizace seznamu v dialogu
-            onClose();
         } catch (error) {
             console.error("Chyba při vytváření zařízení:", error);
         }

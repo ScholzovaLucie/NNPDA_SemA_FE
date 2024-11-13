@@ -48,7 +48,7 @@ function AssignSensor() {
                     <option value="">Vyberte...</option>
                     {sensors.map((sensor) => (
                         <option key={sensor.id} value={sensor.id}>
-                            {sensor.name}
+                            {sensor.sensorName}
                         </option>
                     ))}
                 </TextField>

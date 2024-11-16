@@ -11,7 +11,7 @@ function MainPage() {
 
   useEffect(() => {
     fetchDevices();
-  }, []);
+  }, [devices]);
 
   const fetchDevices = async () => {
     try {
@@ -43,7 +43,7 @@ function MainPage() {
             devices={devices}
             selectedDevice={selectedDevice}
             onSelectDevice={handleSelectDevice}
-            openDialog={() => console.log("Otevřít všechna zařízení")}
+            fetchDevices={fetchDevices}
           />
         </Grid>
 
@@ -53,7 +53,6 @@ function MainPage() {
             selectedDevice={selectedDevice}
             selectedSensor={selectedSensor}
             onSelectSensor={handleSelectSensor}
-            openDialog={() => console.log("Otevřít všechny senzory")}
           />
         </Grid>
       </Grid>

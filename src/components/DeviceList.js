@@ -1,14 +1,24 @@
 import React from "react";
 import {
   Grid,
-  Button,
+  Box,
   Card,
   CardActionArea,
   CardContent,
   Typography,
+  IconButton,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DeviceService from "../services/DeviceService";
 
-function DeviceList({ devices, selectedDevice, onSelectDevice, openDialog }) {
+function DeviceList({ devices, selectedDevice, onSelectDevice, fetchDevices }) {
+  const handleDeleteDevice = async () => {
+    try {
+      await DeviceService.removeDeviceFromUser(selectedDevice.id);
+      fetchDevices();
+    } catch (error) {}
+  };
+
   return (
     <Grid item xs={12}>
       <Typography variant="h6" gutterBottom>
@@ -27,9 +37,29 @@ function DeviceList({ devices, selectedDevice, onSelectDevice, openDialog }) {
         >
           <CardActionArea onClick={() => onSelectDevice(device)}>
             <CardContent>
-              <Typography variant="body1" color="textPrimary">
-                {device.deviceName}
-              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="body1" color="textPrimary">
+                  {device.deviceName}
+                </Typography>
+                {selectedDevice?.id === device.id && (
+                  <IconButton
+                    edge="end"
+                    color="secondary"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Zabrání kliknutí na CardActionArea
+                      handleDeleteDevice();
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                )}
+              </Box>
             </CardContent>
           </CardActionArea>
         </Card>

@@ -66,6 +66,7 @@ function AllSensorsPage() {
   const fetchAllSensors = async () => {
     try {
       const response = await DeviceService.getAllSensors();
+      console.log(response);
       setSensors(response);
     } catch (error) {
       console.error("Chyba při načítání všech senzorů:", error);
@@ -113,6 +114,7 @@ function AllSensorsPage() {
         editedSensorLatitude,
         editedSensorLongitude
       );
+      handleAssignSensorToDevice();
       fetchAllSensors(); // Aktualizuje seznam senzorů
       setSelectedSensor(null); // Vrátí se zpět k vytvoření nového senzoru
     } catch (error) {
@@ -147,6 +149,7 @@ function AllSensorsPage() {
 
   const handleDeleteSensor = async (sensorId) => {
     try {
+      console.log(sensorId);
       await DeviceService.deleteSensor(sensorId);
       fetchAllSensors(); // Aktualizuje seznam senzorů po odstranění
     } catch (error) {
@@ -239,6 +242,22 @@ function AllSensorsPage() {
                 value={editedSensorLongitude}
                 onChange={(e) => setEditedSensorLongitude(e.target.value)}
               />
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ mt: 2 }}
+                onClick={handleUpdateSensor}
+              >
+                Uložit změny
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                sx={{ mt: 2, ml: 2 }}
+                onClick={handleBackToCreate}
+              >
+                Zpět
+              </Button>
               <FormControl fullWidth margin="normal">
                 <InputLabel id="select-device-label">Zařízení</InputLabel>
                 <Select
@@ -256,27 +275,11 @@ function AllSensorsPage() {
               </FormControl>
               <Button
                 variant="contained"
-                color="primary"
-                sx={{ mt: 2 }}
-                onClick={handleUpdateSensor}
-              >
-                Uložit změny
-              </Button>
-              <Button
-                variant="contained"
                 color="secondary"
                 sx={{ mt: 2, ml: 2 }}
                 onClick={handleAssignSensorToDevice}
               >
                 Přiřadit k zařízení
-              </Button>
-              <Button
-                variant="outlined"
-                color="secondary"
-                sx={{ mt: 2, ml: 2 }}
-                onClick={handleBackToCreate}
-              >
-                Zpět
               </Button>
             </DetailBox>
           ) : (

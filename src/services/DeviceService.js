@@ -121,7 +121,7 @@ class DeviceService {
       sensorId: sensorId,
       deviceId: deviceId,
     };
-    return await ApiClient.delete("/sensors/remove", { data: assignSensorDTO });
+    return await ApiClient.delete("/sensors/remove", assignSensorDTO);
   }
 }
 

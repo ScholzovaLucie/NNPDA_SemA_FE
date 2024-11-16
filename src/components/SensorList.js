@@ -10,15 +10,12 @@ import {
   List,
   ListItem,
   ListItemText,
+  IconButton,
 } from "@mui/material";
 import DeviceService from "../services/DeviceService";
+import DeleteIcon from "@mui/icons-material/Delete";
 
-function SensorList({
-  selectedDevice,
-  selectedSensor,
-  onSelectSensor,
-  openDialog,
-}) {
+function SensorList({ selectedDevice, selectedSensor, onSelectSensor }) {
   const [sensorsForDevice, setSensorsForDevice] = useState([]);
   const [sensorData, setSensorData] = useState([]);
   const [page, setPage] = useState(0);
@@ -39,6 +36,7 @@ function SensorList({
 
   const fetchSensorsForDevice = async (deviceId) => {
     try {
+      console.log(deviceId);
       const response = await DeviceService.getSensorsForDevice(deviceId);
       setSensorsForDevice(response);
     } catch (error) {
@@ -70,6 +68,13 @@ function SensorList({
     }
   };
 
+  const handleDeleteSensor = async (sensorId) => {
+    try {
+      await DeviceService.removeSensorFromDevice(sensorId, selectedDevice.id);
+      fetchSensorsForDevice(selectedDevice.id);
+    } catch (error) {}
+  };
+
   return (
     <Grid container spacing={2}>
       {/* Seznam senzorů */}
@@ -92,9 +97,29 @@ function SensorList({
           >
             <CardActionArea onClick={() => onSelectSensor(sensor)}>
               <CardContent>
-                <Typography variant="body1" color="textPrimary">
-                  {sensor.sensorName}
-                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography variant="body1" color="textPrimary">
+                    {sensor.sensorName}
+                  </Typography>
+                  {selectedSensor?.id === sensor.id && (
+                    <IconButton
+                      edge="end"
+                      color="secondary"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Zabrání kliknutí na CardActionArea
+                        handleDeleteSensor(sensor.id);
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  )}
+                </Box>
               </CardContent>
             </CardActionArea>
           </Card>
@@ -124,7 +149,7 @@ function SensorList({
                     <ListItemText
                       primary={`Hodnota: ${data.value}`}
                       secondary={`Vytvořeno: ${new Date(
-                        data.created_at
+                        data.createdAt
                       ).toLocaleString()}`}
                     />
                   </ListItem>

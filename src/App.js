@@ -1,5 +1,10 @@
-import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import React, { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
 import { CssBaseline } from "@mui/material";
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -12,10 +17,29 @@ import AllSensorsPage from "./pages/AllSensorsPage";
 import ProfilePage from "./pages/ProfilePage";
 import ProtectedRoute from "./ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
+import ApiClient from "./services/ApiClient";
 
-function App() {
+function AppWrapper() {
   return (
     <Router>
+      <App />
+    </Router>
+  );
+}
+
+function App() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    ApiClient.setOnUnauthorized(() => {
+      navigate("/login", {
+        state: { message: "Vaše relace vypršela. Přihlaste se znovu." },
+      });
+    });
+  }, [navigate]);
+
+  return (
+    <>
       <CssBaseline />
       <Routes>
         {/* Veřejné trasy */}
@@ -35,8 +59,8 @@ function App() {
           </Route>
         </Route>
       </Routes>
-    </Router>
+    </>
   );
 }
 
-export default App;
+export default AppWrapper;

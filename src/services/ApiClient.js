@@ -1,7 +1,6 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import AuthService from "./AuthService";
-import { useNavigate } from "react-router-dom";
 
 class ApiClient {
   constructor(baseURL) {
@@ -10,37 +9,48 @@ class ApiClient {
       headers: {
         "Content-Type": "application/json",
       },
-      withCredentials: true // Umožňuje posílat cookies s každým požadavkem
+      withCredentials: true, // Umožňuje posílat cookies s každým požadavkem
     });
 
     // Interceptor pro přidání tokenu u každého požadavku kromě autentizace
     this.client.interceptors.request.use(
       (config) => {
-        const authEndpoints = ['/auth/login', '/auth/signup', '/auth/forgot-password'];
-        const isAuthEndpoint = authEndpoints.some(endpoint => config.url.includes(endpoint));
+        const authEndpoints = [
+          "/auth/login",
+          "/auth/signup",
+          "/auth/forgot-password",
+        ];
+        const isAuthEndpoint = authEndpoints.some((endpoint) =>
+          config.url.includes(endpoint)
+        );
 
         if (!isAuthEndpoint) {
           const token = this.getTokenFromCookies();
           if (token) {
-            config.headers['Authorization'] = `Bearer ${token}`;
+            config.headers["Authorization"] = `Bearer ${token}`;
           }
         }
         return config;
       },
       (error) => Promise.reject(error)
     );
+
     this.client.interceptors.response.use(
       (response) => response,
       (error) => {
         if (error.response && error.response.status === 401) {
           AuthService.logoutUser();
-          const navigate = useNavigate();
-          console.log('Vaše relace vypršela. Přihlaste se znovu.')
-          navigate("/login", { state: { message: "Vaše relace vypršela. Přihlaste se znovu." } });
+          if (this.onUnauthorized) {
+            this.onUnauthorized();
+          }
         }
         return Promise.reject(error);
       }
     );
+  }
+
+  setOnUnauthorized(callback) {
+    this.onUnauthorized = callback;
   }
 
   getTokenFromCookies() {
@@ -94,12 +104,12 @@ class ApiClient {
   // DELETE požadavek
   async delete(url, data) {
     try {
-        const response = await this.client.delete(url, { data }); // Předání dat správně
-        return response.data;
+      const response = await this.client.delete(url, { data }); // Předání dat správně
+      return response.data;
     } catch (error) {
-        this.handleError(error);
+      this.handleError(error);
     }
-}
+  }
 
   // Chybové zpracování
   handleError(error) {

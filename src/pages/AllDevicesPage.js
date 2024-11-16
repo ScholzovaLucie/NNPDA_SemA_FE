@@ -98,9 +98,7 @@ function AllDevicesPage() {
     try {
       await DeviceService.deleteDevice(deviceId);
       fetchAllDevices(); // Aktualizuje seznam zařízení po odstranění
-    } catch (error) {
-      console.error("Chyba při odebírání zařízení:", error);
-    }
+    } catch (error) {}
   };
 
   return (

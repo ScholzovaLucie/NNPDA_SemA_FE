@@ -16,9 +16,9 @@ function Dashboard() {
         }}
       >
         <iframe
-          src="http://localhost:5601/app/dashboards#/view/fdb01290-a2c0-11ef-b76a-4b345559b139?embed=true&_g=(refreshInterval:(pause:!f,value:60000),time:(from:'2024-11-14T20:38:12.654Z',to:'2024-11-14T21:12:22.830Z'))&_a=()"
-          height="100%"
-          width="100%"
+          src="http://localhost:5601/app/dashboards#/view/fdb01290-a2c0-11ef-b76a-4b345559b139?embed=true&_g=(refreshInterval:(pause:!f,value:60000),time:(from:now-24h,to:now))&_a=()"
+          height="600"
+          width="800"
         ></iframe>
       </Box>
     </Box>

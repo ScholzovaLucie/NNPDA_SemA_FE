@@ -10,8 +10,9 @@ function MainPage() {
   const [selectedSensor, setSelectedSensor] = useState(null);
 
   useEffect(() => {
+    console.log("fetch user device");
     fetchDevices();
-  }, [devices]);
+  }, []);
 
   const fetchDevices = async () => {
     try {

@@ -24,12 +24,14 @@ function SensorList({ selectedDevice, selectedSensor, onSelectSensor }) {
 
   useEffect(() => {
     if (selectedDevice) {
+      console.log("slected device");
       fetchSensorsForDevice(selectedDevice.id);
     }
   }, [selectedDevice]);
 
   useEffect(() => {
     if (selectedSensor) {
+      console.log("slected sensor");
       fetchSensorData(selectedSensor.id, page, size);
     }
   }, [selectedSensor, page]);

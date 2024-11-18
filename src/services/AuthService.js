@@ -31,7 +31,6 @@ class AuthService {
 
   async updateUserProfile(userData) {
     try {
-      console.log(userData);
       const response = await ApiClient.put(`/users/${userData.id}`, userData); // Endpoint `/users/me` by měl aktualizovat údaje o uživateli
       return response;
     } catch (error) {

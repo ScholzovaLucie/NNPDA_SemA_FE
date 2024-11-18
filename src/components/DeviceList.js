@@ -2,9 +2,9 @@ import React from "react";
 import {
   Grid,
   Box,
-  Card,
-  CardActionArea,
-  CardContent,
+  List,
+  ListItem,
+  ListItemText,
   Typography,
   IconButton,
 } from "@mui/material";
@@ -20,50 +20,60 @@ function DeviceList({ devices, selectedDevice, onSelectDevice, fetchDevices }) {
   };
 
   return (
-    <Grid item xs={12}>
+    <Grid item xs={12} sx={{ height: "100%", overflow: "hidden" }}>
       <Typography variant="h6" gutterBottom>
         Vaše zařízení
       </Typography>
-      {devices.map((device) => (
-        <Card
-          key={device.id}
-          variant="outlined"
-          sx={{
-            mb: 2,
-            borderColor:
-              selectedDevice?.id === device.id ? "primary.main" : "grey.300",
-            boxShadow: selectedDevice?.id === device.id ? 4 : 1,
-          }}
-        >
-          <CardActionArea onClick={() => onSelectDevice(device)}>
-            <CardContent>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Typography variant="body1" color="textPrimary">
-                  {device.deviceName}
-                </Typography>
-                {selectedDevice?.id === device.id && (
-                  <IconButton
-                    edge="end"
-                    color="secondary"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Zabrání kliknutí na CardActionArea
-                      handleDeleteDevice();
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                )}
-              </Box>
-            </CardContent>
-          </CardActionArea>
-        </Card>
-      ))}
+      <Box
+        sx={{
+          height: "calc(100% - 48px)", // Odečte výšku nadpisu
+          overflowY: "auto",
+          border: "1px solid #ddd",
+          borderRadius: 2,
+          p: 2,
+          boxShadow: 2,
+        }}
+      >
+        <List>
+          {devices.map((device) => (
+            <ListItem
+              key={device.id}
+              button
+              onClick={() => onSelectDevice(device)}
+              sx={{
+                mb: 1,
+                border: "1px solid",
+                borderRadius: 1,
+                borderColor:
+                  selectedDevice?.id === device.id
+                    ? "primary.main"
+                    : "grey.300",
+                boxShadow: selectedDevice?.id === device.id ? 4 : 1,
+                "&:hover": {
+                  backgroundColor: "grey.100",
+                },
+              }}
+            >
+              <ListItemText
+                primary={device.deviceName}
+                secondary={selectedDevice?.id === device.id}
+              />
+              {selectedDevice?.id === device.id && (
+                <IconButton
+                  edge="end"
+                  color="secondary"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Zabrání kliknutí na ListItem
+                    handleDeleteDevice(device.id);
+                  }}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              )}
+            </ListItem>
+          ))}
+        </List>
+      </Box>
     </Grid>
   );
 }

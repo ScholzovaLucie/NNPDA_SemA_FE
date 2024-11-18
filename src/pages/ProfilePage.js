@@ -15,7 +15,7 @@ function ProfilePage() {
     id: "",
     username: "",
     email: "",
-    createdAt: "",
+    timestamp: "",
     updatedAt: "",
   });
   const [oldPassword, setOldPassword] = useState("");
@@ -35,7 +35,7 @@ function ProfilePage() {
           id: userData.id,
           username: userData.username,
           email: userData.email,
-          createdAt: userData.createdAt,
+          timestamp: userData.timestamp,
           updatedAt: userData.updatedAt,
         });
       } catch (error) {

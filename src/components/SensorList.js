@@ -2,9 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Grid,
   Button,
-  Card,
-  CardActionArea,
-  CardContent,
   Typography,
   Box,
   List,
@@ -24,21 +21,18 @@ function SensorList({ selectedDevice, selectedSensor, onSelectSensor }) {
 
   useEffect(() => {
     if (selectedDevice) {
-      console.log("slected device");
       fetchSensorsForDevice(selectedDevice.id);
     }
   }, [selectedDevice]);
 
   useEffect(() => {
     if (selectedSensor) {
-      console.log("slected sensor");
       fetchSensorData(selectedSensor.id, page, size);
     }
   }, [selectedSensor, page]);
 
   const fetchSensorsForDevice = async (deviceId) => {
     try {
-      console.log(deviceId);
       const response = await DeviceService.getSensorsForDevice(deviceId);
       setSensorsForDevice(response);
     } catch (error) {
@@ -78,58 +72,66 @@ function SensorList({ selectedDevice, selectedSensor, onSelectSensor }) {
   };
 
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={2} sx={{ height: "90vh", overflow: "hidden" }}>
       {/* Seznam senzorů */}
-      <Grid item xs={12} md={6}>
+      <Grid item xs={12} md={6} sx={{ height: "100%", overflow: "hidden" }}>
         <Typography variant="h6" gutterBottom>
           Senzory
         </Typography>
-        {sensorsForDevice.map((sensor) => (
-          <Card
-            key={sensor.id}
-            variant="outlined"
-            sx={{
-              mb: 2,
-              borderColor:
-                selectedSensor?.id === sensor.id
-                  ? "secondary.main"
-                  : "grey.300",
-              boxShadow: selectedSensor?.id === sensor.id ? 4 : 1,
-            }}
-          >
-            <CardActionArea onClick={() => onSelectSensor(sensor)}>
-              <CardContent>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography variant="body1" color="textPrimary">
-                    {sensor.sensorName}
-                  </Typography>
-                  {selectedSensor?.id === sensor.id && (
-                    <IconButton
-                      edge="end"
-                      color="secondary"
-                      onClick={(e) => {
-                        e.stopPropagation(); // Zabrání kliknutí na CardActionArea
-                        handleDeleteSensor(sensor.id);
-                      }}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  )}
-                </Box>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        ))}
+        <Box
+          sx={{
+            height: "calc(100% - 48px)",
+            overflowY: "auto",
+            border: "1px solid #ddd",
+            borderRadius: 2,
+            p: 2,
+            boxShadow: 2,
+          }}
+        >
+          <List>
+            {sensorsForDevice.map((sensor) => (
+              <ListItem
+                key={sensor.id}
+                button
+                onClick={() => onSelectSensor(sensor)}
+                sx={{
+                  mb: 1,
+                  border: "1px solid",
+                  borderRadius: 1,
+                  borderColor:
+                    selectedSensor?.id === sensor.id
+                      ? "secondary.main"
+                      : "grey.300",
+                  boxShadow: selectedSensor?.id === sensor.id ? 4 : 1,
+                  "&:hover": {
+                    backgroundColor: "grey.100",
+                  },
+                }}
+              >
+                <ListItemText
+                  primary={sensor.sensorName}
+                  secondary={selectedSensor?.id === sensor.id}
+                />
+                {selectedSensor?.id === sensor.id && (
+                  <IconButton
+                    edge="end"
+                    color="secondary"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Zabrání kliknutí na ListItem
+                      handleDeleteSensor(sensor.id);
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                )}
+              </ListItem>
+            ))}
+          </List>
+        </Box>
       </Grid>
 
       {/* Seznam dat senzoru */}
-      <Grid item xs={12} md={6}>
+      <Grid item xs={12} md={6} sx={{ height: "100%", overflow: "hidden" }}>
         {selectedSensor ? (
           <>
             <Typography variant="h6" gutterBottom>
@@ -137,7 +139,7 @@ function SensorList({ selectedDevice, selectedSensor, onSelectSensor }) {
             </Typography>
             <Box
               sx={{
-                maxHeight: 300,
+                height: "calc(100% - 48px)", // Odečte výšku nadpisu
                 overflowY: "auto",
                 border: "1px solid #ddd",
                 borderRadius: 2,
@@ -151,7 +153,7 @@ function SensorList({ selectedDevice, selectedSensor, onSelectSensor }) {
                     <ListItemText
                       primary={`Hodnota: ${data.value}`}
                       secondary={`Vytvořeno: ${new Date(
-                        data.createdAt
+                        data.timestamp
                       ).toLocaleString()}`}
                     />
                   </ListItem>

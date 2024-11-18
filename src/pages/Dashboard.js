@@ -4,6 +4,8 @@ import { Box, Typography } from "@mui/material";
 function Dashboard() {
   return (
     <Box sx={{ padding: 3, height: "90vh" }}>
+      {" "}
+      {/* Změněno na 100vh */}
       <Typography variant="h4" gutterBottom>
         Dashboard
       </Typography>
@@ -16,9 +18,9 @@ function Dashboard() {
         }}
       >
         <iframe
-          src="http://localhost:5601/app/dashboards#/view/fdb01290-a2c0-11ef-b76a-4b345559b139?embed=true&_g=(refreshInterval:(pause:!f,value:60000),time:(from:now-24h,to:now))&_a=()"
-          height="600"
-          width="800"
+          src="http://localhost:5601/app/dashboards#/view/28058050-a584-11ef-b907-df628d41c1c6?embed=true&_g=(refreshInterval:(pause:!f,value:60000),time:(from:now%2Fd,to:now%2Fd))&_a=()&hide-filter-bar=true"
+          height="100%"
+          width="100%"
         ></iframe>
       </Box>
     </Box>

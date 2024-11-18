@@ -18,14 +18,18 @@ import DeviceService from "../services/DeviceService";
 // Stylované komponenty
 const StyledListItem = styled(ListItem)(({ theme, selected }) => ({
   backgroundColor: selected ? theme.palette.action.selected : "transparent",
+  borderRadius: theme.shape.borderRadius,
+  transition: "background-color 0.3s",
   "&:hover": {
     backgroundColor: theme.palette.action.hover,
   },
 }));
 
 const DetailBox = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(2),
+  padding: theme.spacing(3),
   borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[3],
+  height: "100%",
 }));
 
 function AllDevicesPage() {
@@ -75,6 +79,7 @@ function AllDevicesPage() {
         description: editedDeviceDescription,
       });
       fetchAllDevices();
+      setSelectedDevice(null); // Vrátí se zpět k vytvoření nového zařízení
     } catch (error) {
       console.error("Chyba při aktualizaci zařízení:", error);
     }
@@ -98,11 +103,21 @@ function AllDevicesPage() {
     try {
       await DeviceService.deleteDevice(deviceId);
       fetchAllDevices(); // Aktualizuje seznam zařízení po odstranění
-    } catch (error) {}
+    } catch (error) {
+      console.error("Chyba při odstraňování zařízení:", error);
+    }
   };
 
   return (
-    <Box sx={{ padding: 3 }}>
+    <Box
+      sx={{
+        height: "90vh",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        p: 3,
+      }}
+    >
       <Typography variant="h4" gutterBottom>
         Všechna dostupná zařízení
       </Typography>
@@ -122,106 +137,122 @@ function AllDevicesPage() {
             color="primary"
             fullWidth
             onClick={handleBackToCreate}
-            sx={{ height: "100%" }}
           >
             Vytvořit nový
           </Button>
         </Grid>
       </Grid>
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <List>
-            {filteredDevices.map((device) => (
-              <StyledListItem
-                key={device.id}
-                button
-                selected={selectedDevice && selectedDevice.id === device.id}
-                onClick={() => setSelectedDevice(device)}
-              >
-                <ListItemText primary={device.deviceName} />
-                <IconButton
-                  edge="end"
-                  color="secondary"
-                  onClick={() => handleDeleteDevice(device.id)}
+      <Grid container spacing={3} sx={{ flexGrow: 1, overflow: "hidden" }}>
+        <Grid item xs={12} md={6} sx={{ height: "100%" }}>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 2,
+              height: "99%",
+              overflowY: "auto",
+              borderRadius: 2,
+            }}
+          >
+            <List>
+              {filteredDevices.map((device) => (
+                <StyledListItem
+                  key={device.id}
+                  selected={selectedDevice?.id === device.id}
+                  button
+                  onClick={() => setSelectedDevice(device)}
                 >
-                  <DeleteIcon />
-                </IconButton>
-              </StyledListItem>
-            ))}
-          </List>
+                  <ListItemText primary={device.deviceName} />
+                  {selectedDevice?.id === device.id && (
+                    <IconButton
+                      edge="end"
+                      color="secondary"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Zabrání kliknutí na ListItem
+                        handleDeleteDevice(device.id);
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  )}
+                </StyledListItem>
+              ))}
+            </List>
+          </Paper>
         </Grid>
-        <Grid item xs={12} md={6}>
-          {selectedDevice ? (
-            <DetailBox>
-              <Typography variant="h6">Upravit zařízení</Typography>
-              <TextField
-                label="Název zařízení"
-                fullWidth
-                margin="normal"
-                value={editedDeviceName}
-                onChange={(e) => setEditedDeviceName(e.target.value)}
-              />
-              <TextField
-                label="Popis zařízení"
-                fullWidth
-                margin="normal"
-                value={editedDeviceDescription}
-                onChange={(e) => setEditedDeviceDescription(e.target.value)}
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ mt: 2 }}
-                onClick={handleUpdateDevice}
-              >
-                Uložit změny
-              </Button>
-              <Button
-                variant="outlined"
-                color="secondary"
-                sx={{ mt: 2, ml: 2 }}
-                onClick={handleAssignDevice}
-              >
-                Přiřadit
-              </Button>
-              <Button
-                variant="outlined"
-                color="secondary"
-                sx={{ mt: 2, ml: 2 }}
-                onClick={handleBackToCreate}
-              >
-                Zpět
-              </Button>
-            </DetailBox>
-          ) : (
-            <DetailBox>
-              <Typography variant="h6" gutterBottom>
-                Vytvořit nové zařízení
-              </Typography>
-              <TextField
-                label="Název zařízení"
-                fullWidth
-                margin="normal"
-                value={newDeviceName}
-                onChange={(e) => setNewDeviceName(e.target.value)}
-              />
-              <TextField
-                label="Popis zařízení"
-                fullWidth
-                margin="normal"
-                value={newDeviceDescription}
-                onChange={(e) => setNewDeviceDescription(e.target.value)}
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ mt: 2 }}
-                onClick={handleCreateDevice}
-              >
-                Vytvořit
-              </Button>
-            </DetailBox>
-          )}
+        <Grid item xs={12} md={6} height="99%">
+          <DetailBox>
+            {selectedDevice ? (
+              <>
+                <Typography variant="h6">Upravit zařízení</Typography>
+                <TextField
+                  label="Název zařízení"
+                  fullWidth
+                  margin="normal"
+                  value={editedDeviceName}
+                  onChange={(e) => setEditedDeviceName(e.target.value)}
+                />
+                <TextField
+                  label="Popis zařízení"
+                  fullWidth
+                  margin="normal"
+                  value={editedDeviceDescription}
+                  onChange={(e) => setEditedDeviceDescription(e.target.value)}
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{ mt: 2 }}
+                  onClick={handleUpdateDevice}
+                >
+                  Uložit změny
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  sx={{ mt: 2, ml: 2 }}
+                  onClick={handleAssignDevice}
+                >
+                  Přiřadit
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  sx={{ mt: 2, ml: 2 }}
+                  onClick={handleBackToCreate}
+                >
+                  Zpět
+                </Button>
+              </>
+            ) : (
+              <>
+                <Typography variant="h6" gutterBottom>
+                  Vytvořit nové zařízení
+                </Typography>
+                <TextField
+                  label="Název zařízení"
+                  fullWidth
+                  margin="normal"
+                  value={newDeviceName}
+                  onChange={(e) => setNewDeviceName(e.target.value)}
+                />
+                <TextField
+                  label="Popis zařízení"
+                  fullWidth
+                  margin="normal"
+                  value={newDeviceDescription}
+                  onChange={(e) => setNewDeviceDescription(e.target.value)}
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{ mt: 2 }}
+                  onClick={handleCreateDevice}
+                >
+                  Vytvořit
+                </Button>
+              </>
+            )}
+          </DetailBox>
         </Grid>
       </Grid>
     </Box>

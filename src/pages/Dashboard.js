@@ -17,11 +17,7 @@ function Dashboard() {
           height: "100%",
         }}
       >
-        <iframe
-          src="http://localhost:5601/app/dashboards#/view/28058050-a584-11ef-b907-df628d41c1c6?embed=true&_g=(refreshInterval:(pause:!f,value:60000),time:(from:now%2Fd,to:now%2Fd))&_a=()&hide-filter-bar=true"
-          height="100%"
-          width="100%"
-        ></iframe>
+        <iframe src="http://localhost:5601/app/dashboards#/view/0db9bcb0-a760-11ef-8af2-8bcecd72b0a4?embed=true&_g=(refreshInterval:(pause:!f,value:60000),time:(from:now%2Fd,to:now%2Fd))&_a=()&hide-filter-bar=true" height="100%" width="100%"></iframe>
       </Box>
     </Box>
   );
